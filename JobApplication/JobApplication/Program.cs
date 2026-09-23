@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using MediatR;
+using JobApplication.Application.Features.Command.CreateJob;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -113,6 +115,10 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateJobCommandHandler).Assembly));
+
 
 var app = builder.Build();
 

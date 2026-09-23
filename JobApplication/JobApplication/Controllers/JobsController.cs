@@ -1,8 +1,10 @@
 ﻿using JobApplication.Application.DTOs.Jobs;
 using JobApplication.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MediatR;
+using JobApplication.Application.Features.Command.CloseJob;
+using JobApplication.Application.Features.Command.CreateJob;
 
 namespace JobApplication.Controllers
 {
@@ -11,19 +13,19 @@ namespace JobApplication.Controllers
     [Authorize]
     public class JobsController : ControllerBase
     {
-        private readonly IJobService _jobService;
+        private readonly IMediator _iMediator;
 
-        public JobsController(IJobService jobService)
+        public JobsController(IMediator iMediator)
         {
-            _jobService = jobService;
+            _iMediator = iMediator;
         }
 
         [HttpPut("{id}/close")]
-        public async Task<IActionResult> CloseJob(int id)
+        public async Task<IActionResult> CloseJob(int id, CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _jobService.CloseJobAsync(id);
+                var result = await _iMediator.Send(new CloseJobCommand { JobId = id }, cancellationToken);
 
                 if (!result)
                     return NotFound("Job not found.");
@@ -37,11 +39,11 @@ namespace JobApplication.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateJob(CreateJobDto dto)
+        public async Task<IActionResult> CreateJob(CreateJobDto dto , CancellationToken cancellation)
         {
             try
             {
-                var jobId = await _jobService.CreateJobAsync(dto.Title);
+                var jobId = await _iMediator.Send(new CreateJobCommand { Title = dto.Title }, cancellation);
 
                 return Ok(new
                 {
