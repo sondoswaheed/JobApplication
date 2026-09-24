@@ -1,60 +1,97 @@
 ﻿using JobApplication.Application.DTOs.Jobs;
-using JobApplication.Application.Interfaces;
+using JobApplication.Application.Features.Command.CreateJob;
+using JobApplication.Application.Features.Command.UpdateJob;
+using JobApplication.Application.Features.Command.CloseJob;
+using JobApplication.Application.Features.Query.Jobs;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MediatR;
-using JobApplication.Application.Features.Command.CloseJob;
-using JobApplication.Application.Features.Command.CreateJob;
 
-namespace JobApplication.Controllers
+namespace JobApplication.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     [Authorize]
     public class JobsController : ControllerBase
     {
-        private readonly IMediator _iMediator;
+        private readonly IMediator _mediator;
 
-        public JobsController(IMediator iMediator)
+        public JobsController(IMediator mediator)
         {
-            _iMediator = iMediator;
+            _mediator = mediator;
         }
 
-        [HttpPut("{id}/close")]
-        public async Task<IActionResult> CloseJob(int id, CancellationToken cancellationToken)
+        [HttpGet]
+        public async Task<IActionResult> GetAll( CancellationToken cancellationToken)
         {
-            try
-            {
-                var result = await _iMediator.Send(new CloseJobCommand { JobId = id }, cancellationToken);
+            var result = await _mediator.Send( new GetAllJobsQuery(), cancellationToken);
 
-                if (!result)
-                    return NotFound("Job not found.");
-
-                return Ok("Job closed successfully.");
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Forbid();
-            }
+            return Ok(result);
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateJob(CreateJobDto dto , CancellationToken cancellation)
+        [Authorize(Roles = "Recruiter")]
+        public async Task<IActionResult> CreateJob( CreateJobDto dto, CancellationToken cancellationToken)
         {
-            try
-            {
-                var jobId = await _iMediator.Send(new CreateJobCommand { Title = dto.Title }, cancellation);
-
-                return Ok(new
+            var jobId = await _mediator.Send(
+                new CreateJobCommand
                 {
-                    message = "Job created successfully.",
-                    jobId = jobId
-                });
-            }
-            catch (UnauthorizedAccessException)
+                    Title = dto.Title
+                },
+                cancellationToken);
+
+            return Ok(new
             {
-                return Unauthorized();
-            }
+                message = "Job created successfully.",
+                jobId
+            });
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Recruiter")]
+        public async Task<IActionResult> UpdateJob( int id, UpdateJobDto dto, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(
+                new UpdateJobCommand
+                {
+                    JobId = id,
+                    Title = dto.Title
+                },
+                cancellationToken);
+
+            if (!result)
+                return NotFound(new
+                {
+                    message = "Job not found."
+                });
+
+            return Ok(new
+            {
+                message = "Job updated successfully."
+            });
+        }
+
+        [HttpPut("{id}/close")]
+        [Authorize(Roles = "Recruiter")]
+        public async Task<IActionResult> CloseJob( int id, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(
+                new CloseJobCommand
+                {
+                    JobId = id
+                },
+                cancellationToken);
+
+            if (!result)
+                return NotFound(new
+                {
+                    message = "Job not found."
+                });
+
+            return Ok(new
+            {
+                message = "Job closed successfully."
+            });
         }
     }
 }

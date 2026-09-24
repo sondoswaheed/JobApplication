@@ -16,14 +16,29 @@ namespace JobApplication.Infrastructure.Repositories
 
         public async Task<Candidate?> GetByIdAsync(int id)
         {
-            return await _context.Candidates
-                .FirstOrDefaultAsync(c => c.Id == id);
+            return await _context.Candidates.FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task AddAsync(Candidate candidate)
         {
             await _context.Candidates.AddAsync(candidate);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<Candidate?> GetByUserIdAsync(string userId)
+        {
+            return await _context.Candidates.FirstOrDefaultAsync(c => c.UserId == userId);
+        }
+        public async Task UpdateAsync(Candidate candidate)
+        {
+            _context.Candidates.Update(candidate);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<Candidate>> GetAllAsync()
+        {
+            return await _context.Candidates
+                .ToListAsync();
         }
     }
 }

@@ -9,7 +9,6 @@ namespace JobApplication.Application.Features.Command.CreateApplication
 {
     public class CreateApplicationCommand :IRequest<int>
     {
-        public int CandidateId { get; set; }
 
         public int JobId { get; set; }
     }

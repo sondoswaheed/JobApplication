@@ -1,6 +1,6 @@
 ﻿using JobApplication.Application.DTOs.Candidates;
-using JobApplication.Application.Features.Command.CreateCandidate;
-using JobApplication.Application.Interfaces;
+using JobApplication.Application.Features.Command.UpdateCandidate;
+using JobApplication.Application.Features.Query.GetAllCandidates;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,16 +19,30 @@ namespace JobApplication.API.Controllers
             _mediator = mediator;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateCandidate(CreateCandidateDto dto ,CancellationToken cancellation)
+        [HttpGet]
+        [Authorize(Roles = "Recruiter")]
+        public async Task<IActionResult> GetAll( CancellationToken cancellationToken)
         {
-            var candidateId = await _mediator
-                .Send(new CreateCandidateCommand { CVUrl = dto.CVUrl, Email = dto.Email, Name = dto.Email }, cancellation);
-            
+            var result = await _mediator.Send( new GetAllCandidatesQuery(),cancellationToken);
+
+            return Ok(result);
+        }
+
+        [HttpPut("me")]
+        [Authorize(Roles = "Candidate")]
+        public async Task<IActionResult> UpdateProfile(UpdateCandidatesDto dto, CancellationToken cancellationToken)
+        {
+            await _mediator.Send(
+                new UpdateCandidateCommand
+                {
+                    Name = dto.Name,
+                    CVUrl = dto.CVUrl
+                },
+                cancellationToken);
+
             return Ok(new
             {
-                message = "Candidate created successfully.",
-                candidateId = candidateId
+                message = "Candidate profile updated successfully."
             });
         }
     }

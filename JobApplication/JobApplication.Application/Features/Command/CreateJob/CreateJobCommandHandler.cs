@@ -33,7 +33,8 @@ namespace JobApplication.Application.Features.Command.CreateJob
                 IsActive = true,
                 RecruiterId = currentUserId,
                 ClosedAt = null,
-                ClosedBy = null
+                ClosedBy = null,
+                CreatedAt=DateTime.Now
             };
 
             await _jobRepository.AddAsync(job);

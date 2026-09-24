@@ -17,6 +17,7 @@ namespace JobApplication.Domain.Entities
         public string RecruiterId { get; set; }
 
         public DateTime? ClosedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         public string? ClosedBy { get; set; }
 

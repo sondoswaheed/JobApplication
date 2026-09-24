@@ -15,23 +15,25 @@ namespace JobApplication.Infrastructure.Services
             _configuration = configuration;
         }
 
-        public string GenerateToken(string userId, string email)
+        public string GenerateToken(string userId, string email, IList<string> roles)
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, userId),
-                new Claim(ClaimTypes.Email, email)
+                new Claim( ClaimTypes.NameIdentifier, userId),
+                new Claim( ClaimTypes.Email, email)
             };
 
+            foreach (var role in roles)
+            {
+                claims.Add( new Claim( ClaimTypes.Role, role));
+            }
+
             var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(
-                    _configuration["Jwt:Key"]!
-                )
+                Encoding.UTF8.GetBytes( _configuration["Jwt:Key"]!)
             );
 
             var credentials = new SigningCredentials(
-                key,
-                SecurityAlgorithms.HmacSha256
+                key, SecurityAlgorithms.HmacSha256
             );
 
             var token = new JwtSecurityToken(

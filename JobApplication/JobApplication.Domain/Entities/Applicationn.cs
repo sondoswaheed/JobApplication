@@ -1,4 +1,6 @@
-﻿namespace JobApplication.Domain.Entities
+﻿using JobApplication.Domain.Enums;
+
+namespace JobApplication.Domain.Entities
 {
     public class Applicationn
     {
@@ -8,7 +10,7 @@
 
         public int JobId { get; set; }
 
-        public string Status { get; set; } = "Applied";
+        public ApplicationStatus Status { get; set; } = ApplicationStatus.Applied;
 
         public DateTime AppliedAt { get; set; }
 

@@ -32,5 +32,11 @@ namespace JobApplication.Infrastructure.Repositories
             await _context.SaveChangesAsync();
                  
         }
+
+        public async Task<List<Job>> GetAllAsync()
+        {
+            return await _context.Jobs
+                .ToListAsync();
+        }
     }
 }

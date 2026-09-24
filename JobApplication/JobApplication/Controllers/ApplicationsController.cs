@@ -1,6 +1,7 @@
 ﻿using JobApplication.Application.DTOs.Applications;
 using JobApplication.Application.Features.Command.CancelApplication;
 using JobApplication.Application.Features.Command.CreateApplication;
+using JobApplication.Application.Features.Query.GetAllApplications;
 using JobApplication.Application.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -20,11 +21,12 @@ namespace JobApplication.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Candidate")]
         public async Task<IActionResult> CreateApplication( CreateApplicationDto dto ,CancellationToken cancellation)
         {
             try
             {
-                var applicationId = await _mediator.Send(new CreateApplicationCommand { CandidateId = dto.CandidateId , JobId=dto.JobId }, cancellation);
+                var applicationId = await _mediator.Send(new CreateApplicationCommand {  JobId=dto.JobId }, cancellation);
 
                 return Ok(new
                 {
@@ -38,7 +40,27 @@ namespace JobApplication.API.Controllers
             }
         }
 
+        [HttpGet("my")]
+        [Authorize(Roles = "Candidate")]
+        public async Task<IActionResult> GetMyApplications(
+           CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(new GetAllApplicationsQuery(), cancellationToken);
+
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Recruiter")]
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send( new GetAllApplicationsQuery(), cancellationToken);
+
+            return Ok(result);
+        }
+
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Candidate")]
         public async Task<IActionResult> CancelApplication(int id ,CancellationToken cancellation)
         {
             try

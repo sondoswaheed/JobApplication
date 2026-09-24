@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace JobApplication.Infrastructure.Repositories
 {
-    public class ApplicationRepository :IApplicationRepository
+    public class ApplicationRepository : IApplicationRepository
     {
         private readonly AppDbContext _context;
         public ApplicationRepository(AppDbContext context)
@@ -34,5 +34,29 @@ namespace JobApplication.Infrastructure.Repositories
             _context.Applications.Update(app);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<bool> ExistsAsync(int candidateId, int jobId)
+        {
+            return await _context.Applications
+                .AnyAsync(a =>
+                    a.CandidateId == candidateId &&
+                    a.JobId == jobId);
+        }
+
+        public async Task<List<Applicationn>> GetAllAsync()
+        {
+            return await _context.Applications
+                .ToListAsync();
+        }
+
+        public async Task<List<Applicationn>> GetByCandidateIdAsync(
+            int candidateId)
+        {
+            return await _context.Applications
+                .Where(a => a.CandidateId == candidateId)
+                .ToListAsync();
+        }
+
     }
 }
+

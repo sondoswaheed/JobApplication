@@ -7,5 +7,6 @@ namespace JobApplication.Application.Interfaces.Repositories
         Task<Job?> GetByIdAsync(int id);
         Task AddAsync(Job job);
         Task UpdateAsync(Job job);
+        Task<List<Job>> GetAllAsync();
     }
 }

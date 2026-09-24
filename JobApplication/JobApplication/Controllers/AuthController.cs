@@ -18,7 +18,7 @@ namespace JobApplication.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterDto dto)
+        public async Task<IActionResult> Register([FromForm]RegisterDto dto)
         {
             var result = await _authService.RegisterAsync(dto);
 
@@ -29,7 +29,7 @@ namespace JobApplication.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginDto dto)
+        public async Task<IActionResult> Login([FromForm]LoginDto dto)
         {
             var result = await _authService.LoginAsync(dto);
 

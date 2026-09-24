@@ -22,18 +22,24 @@ namespace JobApplication.Application.Features.Command.CloseJob
 
         public async Task<bool> Handle(CloseJobCommand request, CancellationToken cancellationToken)
         {
-         
-            var job = await _jobRepository.GetByIdAsync(request.JobId);
+
+            var userId = _currentUserService.UserId;
+
+            if (string.IsNullOrEmpty(userId))
+                throw new UnauthorizedAccessException( "User is not authenticated." );
+
+            var job =  await _jobRepository.GetByIdAsync(request.JobId);
 
             if (job == null)
                 return false;
 
-            var CurrentUSerID = _currentUserService.UserId;
+            if (job.RecruiterId != userId)
+                throw new UnauthorizedAccessException( "You cannot close another recruiter's job." );
 
-            if (CurrentUSerID != job.RecruiterId)
-                throw new UnauthorizedAccessException();
+            if (!job.IsActive)
+                throw new InvalidOperationException( "Job is already closed." );
 
-            job.Close(CurrentUSerID);
+            job.Close(userId);
 
             await _jobRepository.UpdateAsync(job);
 
